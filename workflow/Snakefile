@@ -1,0 +1,114 @@
+import os
+import sys
+from pathlib import Path
+include: "rules/helpers.smk"
+
+VIEW_BED = config["view_bed"]
+FOCUS_BED = config["focus_bed"]
+GTF_FILE = config["gtf_file"]
+INTERVAL_LIST = config["interval_list"] 
+DENSITY_LISTS = config["density_lists"] 
+OUTPUT_DIR = config["output_dir"]
+MAX_WIDTH = config["max_width"]
+
+assert isinstance(DENSITY_LISTS, dict)
+assert isinstance(MAX_WIDTH, int), "max_width must be an integer"
+
+# Parse the BED files with the required max_width parameter
+COORD_DICT = parse_bed_files(VIEW_BED, FOCUS_BED, MAX_WIDTH)
+# for index, (key, value) in enumerate(COORD_DICT.items()):
+#     if index < 5:
+#         print(f"{key}: {value}")
+#     else:
+#         break
+
+
+wildcard_constraints:
+    region="|".join(COORD_DICT.keys())
+
+include: "rules/preprocessing.smk"
+
+rule all:
+    input:
+        expand(os.path.join(OUTPUT_DIR, "plots", "individual", "{dataset_name}", "{region}.pdf"), 
+               dataset_name=DENSITY_LISTS.keys(), 
+               region=COORD_DICT.keys()),
+        expand(os.path.join(OUTPUT_DIR, "plots", "combined", "{dataset_name}.all_regions.pdf"),
+               dataset_name=DENSITY_LISTS.keys()),
+        expand(os.path.join(OUTPUT_DIR, "plots", "combined", "regions", "{region}.all_datasets.pdf"),
+               region=COORD_DICT.keys())
+
+rule trackplot:
+    input:
+        gtf = GTF_FILE,
+        density = lambda wildcards: DENSITY_LISTS[wildcards.dataset_name],
+        interval = INTERVAL_LIST
+    output:
+        plot = os.path.join(OUTPUT_DIR, "plots", "individual", "{dataset_name}", "{region}.pdf")
+    params:
+        view = lambda wildcards: COORD_DICT[wildcards.region].view,
+        focus = lambda wildcards: "--focus " + COORD_DICT[wildcards.region].focus if COORD_DICT[wildcards.region].focus else "",
+        dpi = config["trackplot_params"]["dpi"],
+        width = config["trackplot_params"]["width"],
+        height = config["trackplot_params"]["height"],
+        threshold = config["trackplot_params"]["threshold"],
+        show_junction_num = "--show-junction-num" if config["trackplot_params"]["show_junction_num"] else "",
+        title = lambda wildcards: "__".join([wildcards.dataset_name, wildcards.region, COORD_DICT[wildcards.region].view, COORD_DICT[wildcards.region].focus if COORD_DICT[wildcards.region].focus else ''])
+    log:
+        os.path.join(OUTPUT_DIR, "logs", "{dataset_name}", "{region}.log")
+    benchmark:
+        os.path.join(OUTPUT_DIR, "benchmarks", "{dataset_name}", "{region}.benchmark.txt")
+    container:
+        "docker://quay.io/biocontainers/trackplot:0.5.2--pyhdfd78af_0"
+    shell:
+        """        
+        trackplot \
+          -e {params.view} \
+          -r {input.gtf} \
+          --density {input.density} \
+          --interval {input.interval} \
+          {params.show_junction_num} \
+          {params.focus} \
+          -o {output.plot} \
+          --dpi {params.dpi} \
+          --width {params.width} \
+          --height {params.height} \
+          --threshold {params.threshold} \
+          --title {params.title} \
+          2> {log}
+        """
+
+
+rule combine_pdfs_within_dataset:
+    input:
+        pdfs = expand(os.path.join(OUTPUT_DIR, "plots", "individual", "{{dataset_name}}", "{region}.pdf"),
+                                               region=COORD_DICT.keys())
+    output:
+        combined_pdf = os.path.join(OUTPUT_DIR, "plots", "combined", "{dataset_name}.all_regions.pdf")
+    log:
+        os.path.join(OUTPUT_DIR, "logs", "{dataset_name}", "combine_pdfs.log")
+    benchmark:
+        os.path.join(OUTPUT_DIR, "benchmarks", "{dataset_name}", "combine_pdfs_within_dataset.benchmark.txt")
+    container:
+        "docker://minidocks/poppler:latest"
+    shell:
+        """
+        pdfunite {input.pdfs} {output.combined_pdf} 2> {log}
+        """
+
+rule combine_pdfs_by_region:
+    input:
+        pdfs = expand(os.path.join(OUTPUT_DIR, "plots", "individual", "{dataset_name}", "{{region}}.pdf"),
+                      dataset_name=DENSITY_LISTS.keys())
+    output:
+        combined_pdf = os.path.join(OUTPUT_DIR, "plots", "combined", "regions", "{region}.all_datasets.pdf")
+    log:
+        os.path.join(OUTPUT_DIR, "logs", "regions", "{region}.combine_pdfs.log")
+    benchmark:
+        os.path.join(OUTPUT_DIR, "benchmarks", "regions", "{region}.combine_pdfs.benchmark.txt")
+    container:
+        "docker://minidocks/poppler:latest"
+    shell:
+        """
+        pdfunite {input.pdfs} {output.combined_pdf} 2> {log}
+        """

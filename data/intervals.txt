@@ -1,0 +1,3 @@
+#file_location	label_of_file
+data/atlas.clusters.2.0.GRCh38.96.bed.bgz	PolyASite
+data/le_ids.merged.sorted.bed	PAPA

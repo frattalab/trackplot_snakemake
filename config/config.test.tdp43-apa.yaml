@@ -1,0 +1,25 @@
+# Input BED files
+# regions in focus_bed are matched to view_bed based on the Name field
+view_bed: "data/cryptic.genes.bed"
+focus_bed: "data/cryptic.le_ids.merged.sorted.bed"
+
+# Set a maximum width of plotting window in bp (intervals in view BED exceeding this are shrunk to max value centred on the focus BED region)
+max_width: 100000
+
+# Reference annotation and tracks
+# dictionary where keys (LHS) is the dataset name (added to plot title) and values (RHS) are paths to the density files
+density_lists: 
+  seddighi_i3_cortical_test: "data/seddighi_test_bams.density.txt"
+
+gtf_file: "data/gencode.v40.annotation.sorted.sorted.gtf.gz"
+interval_list: "data/intervals.txt"
+
+trackplot_params:
+  dpi: 300
+  width: 10
+  height: 1
+  threshold: 5
+  show_junction_num: True  # Set to False to disable
+
+# Output settings
+output_dir: "processed/test.tdp43-apa/"
