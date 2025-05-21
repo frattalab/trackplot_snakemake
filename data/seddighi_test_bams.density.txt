@@ -1,8 +1,7 @@
 # filepath	file_category	label	color
-data/playground-trackplot/seddighi_test_bams/NT_19074709_S20.rep_cryptic_les.bam	bam	NT_19074709_S20	darkgrey
-data/playground-trackplot/seddighi_test_bams/NT_19074717_S21.rep_cryptic_les.bam	bam	NT_19074717_S21	darkgrey
-data/playground-trackplot/seddighi_test_bams/NT_19074719_S22.rep_cryptic_les.bam	bam	NT_19074719_S22	darkgrey
-data/playground-trackplot/seddighi_test_bams/NT_19074725_S27.rep_cryptic_les.bam	bam	NT_19074725_S27	darkgrey
-data/playground-trackplot/seddighi_test_bams/TDP43_19065403_S23.rep_cryptic_les.bam	bam	TDP43_19065403_S23	gold
-data/playground-trackplot/seddighi_test_bams/TDP43_19065407_S25.rep_cryptic_les.bam	bam	TDP43_19065407_S25	gold
-data/playground-trackplot/seddighi_test_bams/TDP43_19065409_S29.rep_cryptic_les.bam	bam	TDP43_19065409_S29	gold
+data/seddighi_test_bams/NT_19074709_S20.rep_cryptic_les.bam	bam	NT_19074709_S20	darkgrey
+data/seddighi_test_bams/NT_19074717_S21.rep_cryptic_les.bam	bam	NT_19074717_S21	darkgrey
+data/seddighi_test_bams/NT_19074719_S22.rep_cryptic_les.bam	bam	NT_19074719_S22	darkgrey
+data/seddighi_test_bams/TDP43_19065403_S23.rep_cryptic_les.bam	bam	TDP43_19065403_S23	gold
+data/seddighi_test_bams/TDP43_19065407_S25.rep_cryptic_les.bam	bam	TDP43_19065407_S25	gold
+data/seddighi_test_bams/TDP43_19065409_S29.rep_cryptic_les.bam	bam	TDP43_19065409_S29	gold

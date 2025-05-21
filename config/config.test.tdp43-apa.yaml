@@ -11,8 +11,8 @@ max_width: 100000
 density_lists: 
   seddighi_i3_cortical_test: "data/seddighi_test_bams.density.txt"
 
-gtf_file: "data/gencode.v40.annotation.sorted.sorted.gtf.gz"
-interval_list: "data/intervals.txt"
+gtf_file: "data/gencode.v40.annotation.gtf.bgz"
+interval_list: "data/intervals.validated.txt"
 
 trackplot_params:
   dpi: 300
