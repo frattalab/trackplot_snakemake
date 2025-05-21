@@ -14,6 +14,33 @@ MAX_WIDTH = config["max_width"]
 assert isinstance(DENSITY_LISTS, dict)
 assert isinstance(MAX_WIDTH, int), "max_width must be an integer"
 
+# Validate input files are bgzipped and tabix-indexed (by file extensions)
+is_gtf_bgzipped, is_gtf_indexed = is_bgzipped_and_indexed(GTF_FILE)
+if not is_gtf_bgzipped:
+    raise ValueError(f"GTF file must be bgzipped (.gz or .bgz): {GTF_FILE}")
+if not is_gtf_indexed:
+    raise ValueError(f"GTF file must have tabix index (.tbi): {GTF_FILE}")
+
+# Repeat validation for intervals.txt file
+if not os.path.exists(INTERVAL_LIST):
+    raise FileNotFoundError(f"Interval list TXT file not found: {INTERVAL_LIST}")
+
+with open(INTERVAL_LIST, 'r') as f:
+    for line_num, line in enumerate(f, 1):
+        if line.strip() and not line.startswith('#'):
+            fields = line.strip().split('\t')
+            if len(fields) >= 1:
+                file_path = fields[0]
+                try:
+                    is_bgzipped, is_indexed = is_bgzipped_and_indexed(file_path)
+                    if not is_bgzipped:
+                        raise ValueError(f"Interval file must be bgzipped (.gz or .bgz): {file_path} (line {line_num} in {INTERVAL_LIST})")
+                    if not is_indexed:
+                        raise ValueError(f"Interval file must have tabix index (.tbi): {file_path} (line {line_num} in {INTERVAL_LIST})")
+                except FileNotFoundError as e:
+                    raise FileNotFoundError(f"Interval file not found: {file_path} (line {line_num} in {INTERVAL_LIST})")
+
+
 # Parse the BED files with the required max_width parameter
 COORD_DICT = parse_bed_files(VIEW_BED, FOCUS_BED, MAX_WIDTH)
 # for index, (key, value) in enumerate(COORD_DICT.items()):
@@ -25,8 +52,6 @@ COORD_DICT = parse_bed_files(VIEW_BED, FOCUS_BED, MAX_WIDTH)
 
 wildcard_constraints:
     region="|".join(COORD_DICT.keys())
-
-include: "rules/preprocessing.smk"
 
 rule all:
     input:
