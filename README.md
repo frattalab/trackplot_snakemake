@@ -47,7 +47,21 @@ All input files have now been validated or re-processed
 - Uses temporary files via the [`tempfile` library](https://docs.python.org/3/library/tempfile.html#tempfile.gettempdir). Use environment variables to modify the temporary directory if necessary.
 - Supports BED or GFF/GTF input interval files only (via the tabix presets).
 
-### Dry run
+### Configuration
+
+The pipeline requires as input:
+
+- BED files for the 'view' regions (plotting window, passed to `trackplot -e`) and a 'focus' region (highlighted window, passed to `trackplot --focus`). Focus regions are matched to view regions by the 'name' (4th) field of the BED file. The 'focus' region BED file path **must be provided, but it is not required to provide a focus region for any of the input regions**
+  - 'view' BED should ideally be BED6 (to include the strand column), the 'focus' bed only needs to be BED4 format (to include the name field)
+- density.txt (`trackplot --density`) and intervals.txt (`trackplot --interval`) files as specified by trackplot. This pipeline does not validate the format of the density.txt file in any way. The interval.txt file is checked to ensure the file extensions imply bgzipped and tabix-indexed
+
+Consult [trackplot documentation](https://trackplot.readthedocs.io/en/latest/command/) for instructions on how to generate trackplot-specific input formats.
+
+It's possible to specify multiple datasets per pipeline run/set of input intervals. Simply add an additional dataset_name and density.txt file to the `density_lists` option. Trackplot is run once for each input region and density.txt file. Output PDF files are then concatenated separately **per interval across datasets** (`<region_name>.all_datasets.pdf`) and **per dataset across intervals** (`<dataset_name>.all_regions.pdf`)
+
+### Usage
+
+To perform a dry run on the test data:
 
 ```bash
 snakemake -p --configfile config/config.test.tdp43-apa.yaml --cores 2 --use-singularity --singularity-args="--bind /home/sam" -n
