@@ -2,11 +2,22 @@
 
 Snakemake pipeline for trackplot to make coverage track plots across a series of intervals
 
+## Installation
+
+Install the execution pipeline using conda/mamba:
+
+```bash
+conda env create -f workflow/envs/trackplot_snakemake.yaml
+conda activate trackplot_snakemake
+```
+
+This minimal environment installs snakemake (>=8.0.0) and samtools (>=1.21.0) to be able to run `bgzip` and `tabix` on input interval files prior to running the pipeline. All snakemake rules themselves are executed inside Singularity containers.
+
 ## Running trackplot across a series of intervals
 
 ### Ensure all input interval files are compressed with bgzip and are tabix-indexed
 
-Trackplot would do this under the hood anyway. But as we want to immediately parallelise across input intervals, we want to avoid race conditions between different invocations of trackplot. The safest way to do this is to pre-validate the input interval files (GTF file and intervals.txt file). Use `workflow/scripts/check_interval_inputs.py` to do this. Requires samtools installation and python 3.9+:
+Trackplot would do this under the hood anyway. But as we want to immediately parallelise across input intervals, we want to avoid race conditions between different invocations of trackplot. The safest way to do this is to pre-validate the input interval files (GTF file and intervals.txt file). Use `workflow/scripts/check_interval_inputs.py` to do this. Requires samtools installation and python 3.9+ (satisfied by the `trackplot_snakemake` conda environment):
 
 ```bash
 python workflow/scripts/check_interval_inputs2.py -g data/gencode.v40.annotation.gtf.gz -i data/intervals.txt -o data/intervals.validated.txt
