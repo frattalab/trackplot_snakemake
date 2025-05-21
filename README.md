@@ -41,7 +41,11 @@ Intervals file: data/intervals.validated.txt
 All input files have now been validated or re-processed
 ```
 
-Note: only checks file extensions and not the actual file contents themselves
+#### Notes
+
+- Only checks file extensions and not the actual file contents themselves.
+- Uses temporary files via the [`tempfile` library](https://docs.python.org/3/library/tempfile.html#tempfile.gettempdir). Use environment variables to modify the temporary directory if necessary.
+- Supports BED or GFF/GTF input interval files only (via the tabix presets).
 
 ### Dry run:
 
