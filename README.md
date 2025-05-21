@@ -66,3 +66,74 @@ To perform a dry run on the test data:
 ```bash
 snakemake -p --configfile config/config.test.tdp43-apa.yaml --cores 2 --use-singularity --singularity-args="--bind /home/sam" -n
 ```
+
+If everything looks ok, remove the `-n` command to execute the pipeline. On the first run this will pull the singularity containers, which can take a bit of extra time:
+
+```bash
+snakemake -p --configfile config/config.test.tdp43-apa.yaml --cores 2 --use-singularity --singularity-args="--bind /home/sam"
+```
+
+On my middle-grade laptop this takes approximately 5 mins to run. Feel free to bump the number of cores to speed up execution. **TODO: subsample the test BAM files and other input files to speed up execution and allow shipping with the repository**.
+
+```bash
+$ tree processed/test.tdp43-apa/
+processed/test.tdp43-apa/
+├── annotations
+├── benchmarks
+│   ├── regions
+│   │   ├── ENSG00000104435.14_1.combine_pdfs.benchmark.txt
+│   │   ├── ENSG00000107807.13_2.combine_pdfs.benchmark.txt
+│   │   ├── ENSG00000126767.18_2.combine_pdfs.benchmark.txt
+│   │   ├── ENSG00000127511.10_2.combine_pdfs.benchmark.txt
+│   │   ├── ENSG00000137161.18_1.combine_pdfs.benchmark.txt
+│   │   └── ENSG00000138083.5_2.combine_pdfs.benchmark.txt
+│   └── seddighi_i3_cortical_test
+│       ├── ENSG00000104435.14_1.benchmark.txt
+│       ├── ENSG00000107807.13_2.benchmark.txt
+│       ├── ENSG00000126767.18_2.benchmark.txt
+│       ├── ENSG00000127511.10_2.benchmark.txt
+│       ├── ENSG00000137161.18_1.benchmark.txt
+│       ├── ENSG00000138083.5_2.benchmark.txt
+│       └── combine_pdfs_within_dataset.benchmark.txt
+├── logs
+│   ├── regions
+│   │   ├── ENSG00000104435.14_1.combine_pdfs.log
+│   │   ├── ENSG00000107807.13_2.combine_pdfs.log
+│   │   ├── ENSG00000126767.18_2.combine_pdfs.log
+│   │   ├── ENSG00000127511.10_2.combine_pdfs.log
+│   │   ├── ENSG00000137161.18_1.combine_pdfs.log
+│   │   └── ENSG00000138083.5_2.combine_pdfs.log
+│   └── seddighi_i3_cortical_test
+│       ├── ENSG00000104435.14_1.log
+│       ├── ENSG00000107807.13_2.log
+│       ├── ENSG00000126767.18_2.log
+│       ├── ENSG00000127511.10_2.log
+│       ├── ENSG00000137161.18_1.log
+│       ├── ENSG00000138083.5_2.log
+│       └── combine_pdfs.log
+└── plots
+    ├── combined
+    │   ├── regions
+    │   │   ├── ENSG00000104435.14_1.all_datasets.pdf
+    │   │   ├── ENSG00000107807.13_2.all_datasets.pdf
+    │   │   ├── ENSG00000126767.18_2.all_datasets.pdf
+    │   │   ├── ENSG00000127511.10_2.all_datasets.pdf
+    │   │   ├── ENSG00000137161.18_1.all_datasets.pdf
+    │   │   └── ENSG00000138083.5_2.all_datasets.pdf
+    │   └── seddighi_i3_cortical_test.all_regions.pdf
+    └── individual
+        └── seddighi_i3_cortical_test
+            ├── ENSG00000104435.14_1.pdf
+            ├── ENSG00000107807.13_2.pdf
+            ├── ENSG00000126767.18_2.pdf
+            ├── ENSG00000127511.10_2.pdf
+            ├── ENSG00000137161.18_1.pdf
+            └── ENSG00000138083.5_2.pdf
+
+12 directories, 39 files
+```
+
+### Miscellaneous notes
+
+- If only one dataset is provided, the `combine_pdfs_by_region` rule is unnecessary. Consider skipping this rule if only one dataset/density.txt file is provided.
+- Only tested with bulk RNA-seq BAM files and standard (BED/GFF) interval formats. Not all trackplot arguments are exposed by the pipeline.
