@@ -20,7 +20,7 @@ This minimal environment installs snakemake (>=8.0.0) and samtools (>=1.21.0) to
 Trackplot would do this under the hood anyway. But as we want to immediately parallelise across input intervals, we want to avoid race conditions between different invocations of trackplot. The safest way to do this is to pre-validate the input interval files (GTF file and intervals.txt file). Use `workflow/scripts/check_interval_inputs.py` to do this. Requires samtools installation and python 3.9+ (satisfied by the `trackplot_snakemake` conda environment):
 
 ```bash
-python workflow/scripts/check_interval_inputs2.py -g data/gencode.v40.annotation.gtf.gz -i data/intervals.txt -o data/intervals.validated.txt
+python workflow/scripts/check_interval_inputs.py -g data/gencode.v40.annotation.gtf.gz -i data/intervals.txt -o data/intervals.validated.txt
 Running: tabix -p gff data/gencode.v40.annotation.gtf.gz
 Error in indexing gff file: Command '['tabix', '-p', 'gff', 'data/gencode.v40.annotation.gtf.gz']' returned non-zero exit status 1.
 STDERR: [tabix] the compression of 'data/gencode.v40.annotation.gtf.gz' is not BGZF
@@ -47,7 +47,7 @@ All input files have now been validated or re-processed
 - Uses temporary files via the [`tempfile` library](https://docs.python.org/3/library/tempfile.html#tempfile.gettempdir). Use environment variables to modify the temporary directory if necessary.
 - Supports BED or GFF/GTF input interval files only (via the tabix presets).
 
-### Dry run:
+### Dry run
 
 ```bash
 snakemake -p --configfile config/config.test.tdp43-apa.yaml --cores 2 --use-singularity --singularity-args="--bind /home/sam" -n
