@@ -14,6 +14,10 @@ MAX_WIDTH = config["max_width"]
 assert isinstance(DENSITY_LISTS, dict)
 assert isinstance(MAX_WIDTH, int), "max_width must be an integer"
 
+# update to 0-length string if not provided 
+if FOCUS_BED is None:
+    FOCUS_BED = ""
+
 # Validate input files are bgzipped and tabix-indexed (by file extensions)
 is_gtf_bgzipped, is_gtf_indexed = is_bgzipped_and_indexed(GTF_FILE)
 if not is_gtf_bgzipped:
@@ -78,7 +82,7 @@ rule trackplot:
         height = config["trackplot_params"]["height"],
         threshold = config["trackplot_params"]["threshold"],
         show_junction_num = "--show-junction-num" if config["trackplot_params"]["show_junction_num"] else "",
-        title = lambda wildcards: "__".join([wildcards.dataset_name, wildcards.region, COORD_DICT[wildcards.region].view, COORD_DICT[wildcards.region].focus if COORD_DICT[wildcards.region].focus else ''])
+        title = lambda wildcards: "__".join([wildcards.dataset_name, wildcards.region, COORD_DICT[wildcards.region].view, COORD_DICT[wildcards.region].focus if COORD_DICT[wildcards.region].focus else '']).rstrip("__")
     log:
         os.path.join(OUTPUT_DIR, "logs", "{dataset_name}", "{region}.log")
     benchmark:

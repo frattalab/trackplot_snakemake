@@ -55,58 +55,94 @@ def parse_bed_files(view_bed_path: str, focus_bed_path: str, max_width: int) -> 
             coord_dict[name] = CoordinatePair(view=view_str)
     
     # Parse the focus BED file
-    with open(focus_bed_path, 'r') as f:
-        for line in f:
-            if line.startswith('#') or not line.strip():
-                continue  # Skip comments and empty lines
-                
-            fields = line.strip().split('\t')
-            if len(fields) < 4:
-                continue  # Skip lines without enough fields
-                
-            chrom = fields[0]
-            start = int(fields[1])
-            end = int(fields[2])
-            name = fields[3]
+    if focus_bed_path == "":
+        # leave empty if not provided - only check the width
+        print(f"Focus BED not provided - validating view interval widths do not exceed specified max width - {max_width}", file=sys.stderr)
+        for name, coordinate in coord_dict.items():
+            # Extract the original view data
+            view_parts = coordinate.view.split(':')
+            view_chrom = view_parts[0]
+            view_coords = view_parts[1].split('-')
+            view_start = int(view_coords[0])
+            view_end = int(view_coords[1])
+            view_strand = view_parts[2]
             
-            # Create the focus string in the format start-end
-            focus_str = f"{start}-{end}"
-            
-            # Update the dictionary entry if the name exists
-            if name in coord_dict:
-                coord_dict[name].focus = focus_str
+            # Calculate current width
+            width = view_end - view_start
+            if width > max_width:
+                print(f"Warning: Interval '{name}' exceeds max_width of {max_width}bp (current width: {width}bp). Adjusting to center around input region.", file=sys.stderr)
+                # Calculate center of input region
+                focus_center = (view_start + view_end) // 2
                 
-                # Extract the original view data
-                view_parts = coord_dict[name].view.split(':')
-                view_chrom = view_parts[0]
-                view_coords = view_parts[1].split('-')
-                view_start = int(view_coords[0])
-                view_end = int(view_coords[1])
-                view_strand = view_parts[2]
+                # Set new view start and end centered on input region
+                new_start = max(0, focus_center - max_width // 2)
+                new_end = new_start + max_width
                 
-                # Calculate current width
-                width = view_end - view_start
+                # Update the view string
+                new_view_str = f"{view_chrom}:{new_start}-{new_end}:{view_strand}"
                 
-                # If width exceeds max_width, adjust it around the focus
-                if width > max_width:
-                    # Output warning to stderr
-                    print(f"Warning: Interval '{name}' exceeds max_width of {max_width}bp (current width: {width}bp). Adjusting to center around focus region.", file=sys.stderr)
+                # Add information about the change to the warning
+                print(f"  - Original view: {coordinate.view}", file=sys.stderr)
+                print(f"  - Updated view: {new_view_str}", file=sys.stderr)
+                
+                coord_dict[name].view = new_view_str
+            else:
+                # no need to update interval
+                continue
+
+    else:
+        with open(focus_bed_path, 'r') as f:
+            for line in f:
+                if line.startswith('#') or not line.strip():
+                    continue  # Skip comments and empty lines
                     
-                    # Calculate center of focus region
-                    focus_center = (start + end) // 2
+                fields = line.strip().split('\t')
+                if len(fields) < 4:
+                    continue  # Skip lines without enough fields
                     
-                    # Set new view start and end centered on focus
-                    new_start = max(0, focus_center - max_width // 2)
-                    new_end = new_start + max_width
+                chrom = fields[0]
+                start = int(fields[1])
+                end = int(fields[2])
+                name = fields[3]
+                
+                # Create the focus string in the format start-end
+                focus_str = f"{start}-{end}"
+                
+                # Update the dictionary entry if the name exists
+                if name in coord_dict:
+                    coord_dict[name].focus = focus_str
                     
-                    # Update the view string
-                    new_view_str = f"{view_chrom}:{new_start}-{new_end}:{view_strand}"
+                    # Extract the original view data
+                    view_parts = coord_dict[name].view.split(':')
+                    view_chrom = view_parts[0]
+                    view_coords = view_parts[1].split('-')
+                    view_start = int(view_coords[0])
+                    view_end = int(view_coords[1])
+                    view_strand = view_parts[2]
                     
-                    # Add information about the change to the warning
-                    print(f"  - Original view: {coord_dict[name].view}", file=sys.stderr)
-                    print(f"  - Updated view: {new_view_str}", file=sys.stderr)
+                    # Calculate current width
+                    width = view_end - view_start
                     
-                    coord_dict[name].view = new_view_str
+                    # If width exceeds max_width, adjust it around the focus
+                    if width > max_width:
+                        # Output warning to stderr
+                        print(f"Warning: Interval '{name}' exceeds max_width of {max_width}bp (current width: {width}bp). Adjusting to center around focus region.", file=sys.stderr)
+                        
+                        # Calculate center of focus region
+                        focus_center = (start + end) // 2
+                        
+                        # Set new view start and end centered on focus
+                        new_start = max(0, focus_center - max_width // 2)
+                        new_end = new_start + max_width
+                        
+                        # Update the view string
+                        new_view_str = f"{view_chrom}:{new_start}-{new_end}:{view_strand}"
+                        
+                        # Add information about the change to the warning
+                        print(f"  - Original view: {coord_dict[name].view}", file=sys.stderr)
+                        print(f"  - Updated view: {new_view_str}", file=sys.stderr)
+                        
+                        coord_dict[name].view = new_view_str
     
     return coord_dict
 

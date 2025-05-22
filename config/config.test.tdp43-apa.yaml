@@ -1,5 +1,6 @@
 # Input BED files
 # regions in focus_bed are matched to view_bed based on the Name field
+# focus_bed is optional - can be left empty or as an empty string ("") if don't want to provide
 view_bed: "data/cryptic.genes.bed"
 focus_bed: "data/cryptic.le_ids.merged.sorted.bed"
 
